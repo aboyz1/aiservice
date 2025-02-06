@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Generation</title>
+</head>
+<body>
+    <h1>AI-Powered Topic Generator</h1>
+    <form method="POST">
+        <label for="user_input">Enter Text for Topic Generation:</label><br>
+        <textarea id="user_input" name="user_input" rows="5" cols="40" required></textarea><br><br>
+
+        <label for="num_topics">Number of Topics:</label><br>
+        <input type="number" id="num_topics" name="num_topics" value="3" min="1"><br><br>
+
+        <button type="submit">Generate Topics</button>
+    </form>
+
+    {% if topics %}
+        <h2>Generated Topics:</h2>
+        <ul>
+            {% for topic in topics %}
+                <li>{{ topic }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div id="chatbot-container" style="position: fixed; bottom: 0; right: 10px; width: 300px; background: #f5f5f5; border: 1px solid #ccc; border-radius: 10px;">
+        <h4 style="margin: 10px;">Chatbot Assistant</h4>
+        <div id="chatbot-window" style="height: 300px; overflow-y: auto; padding: 10px; background: #ffffff; border: 1px solid #ccc; border-radius: 5px;"></div>
+        <input id="chatbot-input" type="text" placeholder="Ask me anything..." style="width: 80%; margin: 10px;" />
+        <button onclick="sendChatMessage()" style="width: 15%; margin: 10px;">Send</button>
+    </div>
+    
+    <script>
+        async function sendChatMessage() {
+            const input = document.getElementById("chatbot-input").value;
+            if (!input.trim()) return;
+            const chatWindow = document.getElementById("chatbot-window");
+    
+            // Display user message
+            chatWindow.innerHTML += `<div><strong>You:</strong> ${input}</div>`;
+            document.getElementById("chatbot-input").value = "";
+    
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: input }),
+                });
+                const data = await response.json();
+                const botResponse = data.response || data.error;
+    
+                // Display bot response
+                chatWindow.innerHTML += `<div><strong>Bot:</strong> ${botResponse}</div>`;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            } catch (error) {
+                chatWindow.innerHTML += `<div><strong>Bot:</strong> Error connecting to chatbot</div>`;
+            }
+        }
+    </script>
+    
+</body>
+</html>

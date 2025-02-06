@@ -1,0 +1,98 @@
+# services:
+#   node-api:
+#     build:
+#       context: ./api
+#       dockerfile: Dockerfile
+#     env_file:
+#       - ./api/.env
+#     ports:
+#       - "5000:5000"
+#     environment:
+#       - CHOKIDAR_USEPOLLING=true
+#     volumes:
+#       - ./api:/usr/src/app
+#     depends_on:
+#       - mongo
+#       - ai-service
+#     restart: always
+#     command: npm run dev
+#     networks:
+#       - app-network
+
+#   ai-service:
+#     build:
+#       context: ./ai
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       - FLASK_APP=main.py
+#       - FLASK_ENV=development
+#     volumes:
+#       - ./ai:/usr/src/ai
+#     restart: always
+#     command: python app/main.py
+#     networks:
+#       - app-network
+
+#   mongo:
+#     image: mongo:latest
+#     ports:
+#       - "27017:27017"
+#     volumes:
+#       - ./api/mongod.conf:/etc/mongo/mongod.conf  # Mount the mongod.conf from the api directory
+#       - mongo-data:/data/db
+#     restart: always
+#     command: ["mongod", "--config", "/etc/mongo/mongod.conf"]  # Ensure it uses the new config
+#     networks:
+#       - app-network
+
+# volumes:
+#   mongo-data:
+
+# networks:
+#   app-network:
+#     driver: bridge
+
+
+# services:
+#   ai-app:
+#     build:
+#       context: ./ai 
+#     container_name: ai_app
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./ai/generated_docs:/usr/src/ai/generated_docs  # Mounts the host's generated_docs folder to the container
+#     environment:
+#       - FLASK_APP=ai/app/main.py
+#       - FLASK_ENV=development
+#     networks:
+#       - ai-network
+
+# networks:
+#   ai-network:
+#     driver: bridge
+
+# volumes:
+#   generated_docs:
+#     driver: local
+
+
+version: '3.8'
+
+services:
+  ai_service:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/usr/src/ai/app
+      - generated_docs:/usr/src/ai/generated_docs
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=dev-secret-key
+    restart: unless-stopped
+
+volumes:
+  generated_docs:
