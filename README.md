@@ -8,5 +8,5 @@ A Flask-based AI service for topic generation, document generation, and chatbot 
 # Build and run with Docker Compose
 docker compose up --build
 
-# Access the service
+# Access the service 
 http://localhost:8000/ai
